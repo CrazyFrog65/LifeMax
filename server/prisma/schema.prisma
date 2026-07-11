@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  categories   Category[]
+  activities   Activity[]
+  dayLogs      DayLog[]
+  goals        Goal[]
+  habits       Habit[]
+}
+
+model Category {
+  id               String     @id @default(uuid())
+  name             String
+  color            String?
+  productive       Boolean    @default(false)
+  icon             String?
+  defaultUrgent    Boolean    @default(false)
+  defaultImportant Boolean    @default(false)
+  userId           String
+  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activities       Activity[]
+  goals            Goal[]
+}
+
+model Activity {
+  id         String      @id @default(uuid())
+  name       String
+  categoryId String
+  category   Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  color      String?
+  archived   Boolean     @default(false)
+  userId     String
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timeBlocks TimeBlock[]
+}
+
+model DayLog {
+  id             String      @id @default(uuid())
+  date           DateTime    @db.Date
+  notes          String?
+  mood           Int? // 1-5 or 1-10 scale
+  energy         Int? // 1-5 or 1-10 scale
+  sleepHours     Float?
+  effectiveRatio Float?
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timeBlocks     TimeBlock[]
+
+  @@unique([userId, date])
+}
+
+model TimeBlock {
+  id              String   @id @default(uuid())
+  dayLogId        String
+  dayLog          DayLog   @relation(fields: [dayLogId], references: [id], onDelete: Cascade)
+  activityId      String
+  activity        Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  startTime       DateTime
+  endTime         DateTime
+  durationMinutes Int
+  notes           String?
+  isUrgent        Boolean  @default(false)
+  isImportant     Boolean  @default(false)
+}
+
+model Goal {
+  id           String    @id @default(uuid())
+  title        String
+  description  String?
+  targetHours  Float
+  currentHours Float     @default(0)
+  deadline     DateTime?
+  completed    Boolean   @default(false)
+  categoryId   String?
+  category     Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Habit {
+  id            String       @id @default(uuid())
+  name          String
+  frequency     String // e.g., "DAILY", "WEEKLY"
+  icon          String?
+  targetPerWeek Int          @default(7)
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries       HabitEntry[]
+}
+
+model HabitEntry {
+  id        String   @id @default(uuid())
+  habitId   String
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  completed Boolean  @default(false)
+
+  @@unique([habitId, date])
+}
