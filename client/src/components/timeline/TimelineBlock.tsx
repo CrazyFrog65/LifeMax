@@ -43,18 +43,22 @@ export const TimelineBlock = React.memo(({
       sx={{
         position: 'absolute',
         top,
-        height,
-        left: 4,
-        right: 4,
-        bgcolor: isEmpty ? 'transparent' : `${color}15`,
-        borderLeft: isEmpty ? 'none' : `4px solid ${color}`,
-        borderTop: isEmpty ? 'none' : '1px solid rgba(255,255,255,0.05)',
-        borderBottom: isEmpty ? 'none' : '1px solid rgba(255,255,255,0.05)',
-        borderRadius: 0,
+        height: Math.max(15, height), // Ensure a minimum height for short blocks
+        left: 6,
+        right: 6,
+        bgcolor: isEmpty ? 'transparent' : color,
+        borderLeft: isEmpty ? 'none' : `4px solid rgba(0, 0, 0, 0.18)`,
+        border: isEmpty ? 'none' : '1px solid rgba(0, 0, 0, 0.08)',
+        borderRadius: isEmpty ? 0 : '8px',
+        boxShadow: isEmpty ? 'none' : '0 1px 3px rgba(0, 0, 0, 0.15)',
         overflow: 'hidden',
         cursor: 'grab',
-        transition: 'background-color 0.2s',
-        '&:hover': { bgcolor: isEmpty ? 'rgba(255,255,255,0.02)' : `${color}25` },
+        transition: 'box-shadow 0.2s ease, filter 0.2s ease, background-color 0.2s ease',
+        '&:hover': {
+          bgcolor: isEmpty ? 'rgba(255,255,255,0.02)' : color,
+          boxShadow: isEmpty ? 'none' : '0 3px 6px rgba(0, 0, 0, 0.2)',
+          filter: isEmpty ? 'none' : 'brightness(1.05)'
+        },
         '&:active': { cursor: 'grabbing' },
         zIndex: isEmpty ? 5 : 10,
         touchAction: 'none'
@@ -69,29 +73,36 @@ export const TimelineBlock = React.memo(({
             top: 0,
             left: 0,
             right: 0,
-            height: 10,
+            height: 8,
             cursor: 'ns-resize',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+            zIndex: 15,
+            '&:hover': { bgcolor: 'rgba(0,0,0,0.05)' },
           }}
         />
       )}
       {!isEmpty && (
         <Box sx={{ p: 1, height: '100%', display: 'flex', flexDirection: 'column', pointerEvents: 'none' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <Typography sx={{ color: '#E6EDF3', fontWeight: 600, fontSize: '0.85rem', lineHeight: 1.2 }}>
+          <Box sx={{
+            display: 'flex',
+            flexDirection: height <= 35 ? 'row' : 'column',
+            alignItems: height <= 35 ? 'center' : 'flex-start',
+            gap: height <= 35 ? 1 : 0.2,
+            justifyContent: 'flex-start'
+          }}>
+            <Typography sx={{ color: '#1A1A1A', fontWeight: 700, fontSize: '0.825rem', lineHeight: 1.2 }}>
               {block.activityName || category?.name || 'Unnamed Task'}
             </Typography>
-            <Typography sx={{ color: '#8B949E', fontSize: '0.75rem', ml: 1, whiteSpace: 'nowrap' }}>
-              {displayTime(block.startTime, useAmPm)} - {displayTime(block.endTime, useAmPm)}
+            <Typography sx={{ color: 'rgba(26, 26, 26, 0.7)', fontSize: '0.7rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
+              {displayTime(block.startTime, useAmPm)} – {displayTime(block.endTime, useAmPm)}
             </Typography>
           </Box>
           {height >= 45 && (
             <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
-              {block.isUrgent && <Chip size="small" label="Urgent" sx={{ height: 16, fontSize: '0.65rem', bgcolor: 'rgba(210, 153, 34, 0.2)', color: '#D29922' }} />}
-              {block.isImportant && <Chip size="small" label="Important" sx={{ height: 16, fontSize: '0.65rem', bgcolor: 'rgba(248, 81, 73, 0.2)', color: '#F85149' }} />}
+              {block.isUrgent && <Chip size="small" label="Urgent" sx={{ height: 16, fontSize: '0.625rem', fontWeight: 600, bgcolor: 'rgba(0, 0, 0, 0.08)', color: '#1A1A1A', border: '1px solid rgba(0,0,0,0.12)' }} />}
+              {block.isImportant && <Chip size="small" label="Important" sx={{ height: 16, fontSize: '0.625rem', fontWeight: 600, bgcolor: 'rgba(0, 0, 0, 0.08)', color: '#1A1A1A', border: '1px solid rgba(0,0,0,0.12)' }} />}
             </Box>
           )}
         </Box>
@@ -106,17 +117,18 @@ export const TimelineBlock = React.memo(({
             bottom: 0,
             left: 0,
             right: 0,
-            height: 10,
+            height: 8,
             cursor: 'ns-resize',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+            zIndex: 15,
+            '&:hover': { bgcolor: 'rgba(0,0,0,0.05)' },
             '&::after': {
               content: '""',
               width: 30,
-              height: 4,
-              bgcolor: 'rgba(255,255,255,0.3)',
+              height: 3,
+              bgcolor: 'rgba(0,0,0,0.18)',
               borderRadius: 2
             }
           }}

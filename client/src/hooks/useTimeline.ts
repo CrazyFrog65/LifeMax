@@ -42,14 +42,21 @@ export function useTimeline(
     setBlocks(prev => {
       const index = prev.findIndex(b => b.id === id);
       if (index === -1) return prev;
-      
-      const newBlocks = [...prev];
-      const target = newBlocks[index];
-      
+
+      const target = prev[index];
+
       const formatTime = (m: number) => m === 1440 ? '00:00' : toTimeStr(m);
-      
-      newBlocks[index] = { ...target, startTime: formatTime(newStartMins), endTime: formatTime(newEndMins) };
-      
+
+      const newStartTimeStr = formatTime(newStartMins);
+      const newEndTimeStr = formatTime(newEndMins);
+
+      if (target.startTime === newStartTimeStr && target.endTime === newEndTimeStr) {
+        return prev;
+      }
+
+      const newBlocks = [...prev];
+      newBlocks[index] = { ...target, startTime: newStartTimeStr, endTime: newEndTimeStr };
+
       return newBlocks;
     });
   }, []);
@@ -58,10 +65,10 @@ export function useTimeline(
     setBlocks(prev => {
       const blockIndex = prev.findIndex(b => b.id === id);
       if (blockIndex === -1) return prev;
-      
+
       const newBlocks = prev.map(b => ({ ...b }));
       newBlocks[blockIndex] = { ...newBlocks[blockIndex], [field]: value };
-      
+
       if (field === 'categoryId') {
         const cat = categoriesRef.current.find(c => c.id === value);
         if (cat) {
@@ -76,9 +83,9 @@ export function useTimeline(
   const handleDragStart = useCallback((e: React.PointerEvent, block: TimeBlock, mode: 'top' | 'bottom' | 'body') => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     closePopover();
-    
+
     const index = blocks.findIndex(b => b.id === block.id);
     if (index === -1) return;
 
@@ -87,7 +94,7 @@ export function useTimeline(
       if (isEnd && m === 0) return 1440;
       return m;
     };
-    
+
     const initialStartMins = getMins(block.startTime, false);
     const initialEndMins = getMins(block.endTime, true);
     const targetDur = initialEndMins - initialStartMins;
@@ -107,24 +114,24 @@ export function useTimeline(
     }
 
     const startY = e.clientY;
-    
+
     let isDragging = false;
 
     const onMove = (moveEvent: PointerEvent) => {
       let deltaY = moveEvent.clientY - startY;
-      
+
       if (!isDragging && Math.abs(deltaY) > 3) {
         isDragging = true;
         pushHistory(blocks);
       }
-      
+
       if (isDragging) {
         let deltaMins = Math.round(deltaY / 15) * 15;
         deltaMins = Math.max(minDelta, Math.min(maxDelta, deltaMins));
-        
+
         let newStartMins = initialStartMins;
         let newEndMins = initialEndMins;
-        
+
         if (mode === 'top') newStartMins += deltaMins;
         if (mode === 'bottom') newEndMins += deltaMins;
         if (mode === 'body') {
@@ -135,16 +142,16 @@ export function useTimeline(
         moveBlockBoundaries(block.id, mode, newStartMins, newEndMins);
       }
     };
-    
+
     const onUp = (upEvent: PointerEvent) => {
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
-      
+
       if (!isDragging && mode === 'body') {
         openPopover(block.id, upEvent.clientY, upEvent.clientX);
       }
     };
-    
+
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp);
   }, [blocks, pushHistory, openPopover, closePopover, moveBlockBoundaries]);
@@ -156,17 +163,17 @@ export function useTimeline(
     const mins = Math.max(0, Math.round(y / 15) * 15);
     const timeStr = toTimeStr(mins);
     if (mins === 0 || mins === 1440) return; // don't split at very edge
-    
+
     const blockIndex = blocks.findIndex(b => {
       const s = toMins(b.startTime);
       const e = b.endTime === '00:00' ? 1440 : toMins(b.endTime);
       return mins > s && mins < e;
     });
-    
+
     if (blockIndex !== -1) {
       pushHistory(blocks);
       const target = blocks[blockIndex];
-      
+
       setBlocks(prev => {
         const newBlocks = [...prev];
         newBlocks[blockIndex] = { ...target, endTime: timeStr };
@@ -183,18 +190,18 @@ export function useTimeline(
       });
     } else {
       pushHistory(blocks);
-      
+
       const nextBlock = blocks
         .filter(b => toMins(b.startTime) >= mins)
         .sort((a, b) => toMins(a.startTime) - toMins(b.startTime))[0];
-      
+
       const nextStart = nextBlock ? toMins(nextBlock.startTime) : 1440;
       const duration = Math.min(60, nextStart - mins);
       if (duration < 15) return;
-      
+
       const endTimeStr = toTimeStr(mins + duration);
       const defaultCat = categories[0]?.id || '';
-      
+
       setBlocks(prev => [
         ...prev,
         {
@@ -221,17 +228,17 @@ export function useTimeline(
     setBlocks(prev => {
       const index = prev.findIndex(b => b.id === id);
       if (index === -1) return prev;
-      
+
       const target = prev[index];
       let startMins = toMins(target.startTime);
       let endMins = target.endTime === '00:00' ? 1440 : toMins(target.endTime);
-      
+
       const dur = endMins - startMins;
       if (dur <= 15) return prev;
-      
+
       const splitDur = Math.floor(dur / 2 / 15) * 15 || 15;
       const midStr = toTimeStr(startMins + splitDur);
-      
+
       const newBlocks = [...prev];
       newBlocks[index] = { ...target, endTime: midStr };
       newBlocks.splice(index + 1, 0, {

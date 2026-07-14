@@ -18,6 +18,10 @@ app.use(express.json());
 app.use(pinoHttp({ logger }));
 
 // Root route prefix
+app.get("/", (req, res) => {
+  res.json({ success: true, message: "LifeMax API is active and running!" });
+});
+
 app.use("/api", requireAuth, routes);
 
 app.use(errorHandler);

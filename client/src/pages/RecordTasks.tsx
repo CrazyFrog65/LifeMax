@@ -24,7 +24,7 @@ export default function RecordTasks() {
   const [isSaving, setIsSaving] = useState(false);
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  
+
   const [popoverState, setPopoverState] = useState<{ id: string, top: number, left: number } | null>(null);
   const [contextMenuState, setContextMenuState] = useState<{ id: string, top: number, left: number } | null>(null);
 
@@ -110,13 +110,13 @@ export default function RecordTasks() {
 
   return (
     <>
-      <Box sx={{ 
-        display: 'flex', 
-        flexDirection: { xs: 'column', md: 'row' }, 
-        justifyContent: 'space-between', 
-        alignItems: { xs: 'stretch', md: 'center' }, 
-        gap: 2, 
-        mb: 3 
+      <Box sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
+        justifyContent: 'space-between',
+        alignItems: { xs: 'stretch', md: 'center' },
+        gap: 2,
+        mb: 3
       }}>
         <Box>
           <Typography variant="h4" sx={{ color: '#E6EDF3', fontWeight: 700, mb: 0.5, fontSize: { xs: '1.75rem', md: '2.125rem' } }}>
@@ -126,14 +126,15 @@ export default function RecordTasks() {
             Visually map your day. Drag blocks to move, drag edges to resize. Double-click to split.
           </Typography>
         </Box>
-        
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: { xs: 'column', sm: 'row' }, 
-          alignItems: { xs: 'stretch', sm: 'center' }, 
-          gap: { xs: 2, sm: 3 } 
+
+        <Box sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'stretch', sm: 'center' },
+          gap: { xs: 2, sm: 3 },
+          flexShrink: 0
         }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexShrink: 0 }}>
             <Box sx={{ textAlign: 'left' }}>
               <Typography sx={{ color: '#8B949E', fontSize: '0.85rem' }}>Effective Ratio</Typography>
               <Typography sx={{ color: effectiveRatio >= 0.8 ? '#3FB950' : '#E6EDF3', fontSize: '1.5rem', fontWeight: 700 }}>
@@ -161,8 +162,8 @@ export default function RecordTasks() {
               />
             </LocalizationProvider>
           </Box>
-          
-          <Box sx={{ display: 'flex', gap: 1, justifyContent: { xs: 'space-between', sm: 'flex-start' } }}>
+
+          <Box sx={{ display: 'flex', gap: 1.5, justifyContent: { xs: 'space-between', sm: 'flex-start' }, flexShrink: 0 }}>
             <Tooltip title="Undo last action (Ctrl+Z)">
               <Box component="span" sx={{ display: 'inline-flex', flex: { xs: 1, sm: 'initial' } }}>
                 <Button
@@ -180,7 +181,16 @@ export default function RecordTasks() {
               startIcon={<SaveRoundedIcon />}
               onClick={handleSave}
               disabled={isSaving}
-              sx={{ flex: 2, bgcolor: '#6C9EFF', color: '#000', fontWeight: 600, '&:hover': { bgcolor: '#58A6FF' } }}
+              sx={{
+                flex: { xs: 2, sm: 'initial' },
+                minWidth: '130px',
+                whiteSpace: 'nowrap',
+                bgcolor: '#6C9EFF',
+                color: '#000',
+                fontWeight: 600,
+                px: 3,
+                '&:hover': { bgcolor: '#58A6FF' }
+              }}
             >
               {isSaving ? 'Saving...' : 'Save Day'}
             </Button>
