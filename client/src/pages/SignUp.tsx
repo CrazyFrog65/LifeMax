@@ -230,6 +230,18 @@ export default function SignUp() {
                       <LockOutlinedIcon sx={{ color: '#a1a1aa', fontSize: 18 }} />
                     </InputAdornment>
                   }
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        sx={{ color: '#a1a1aa', borderRadius: 0, p: 0.5 }}
+                      >
+                        {showPassword ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
                   sx={{
                     bgcolor: '#09090b',
                     borderRadius: 0,
@@ -255,6 +267,18 @@ export default function SignUp() {
                   startAdornment={
                     <InputAdornment position="start" sx={{ mr: 0.5 }}>
                       <LockOutlinedIcon sx={{ color: '#a1a1aa', fontSize: 18 }} />
+                    </InputAdornment>
+                  }
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        sx={{ color: '#a1a1aa', borderRadius: 0, p: 0.5 }}
+                      >
+                        {showPassword ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
+                      </IconButton>
                     </InputAdornment>
                   }
                   sx={{
