@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Box, Typography, Paper, TextField, Chip } from '@mui/material';
+import { Box, Typography, Paper, Chip } from '@mui/material';
 import axios from '../utils/apiClient';
 import dayjs from 'dayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -86,13 +86,6 @@ export default function EisenhowerMatrix() {
     };
   }, [blocks, quadrants]);
 
-  const formatDuration = (minutes: number) => {
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    if (h > 0 && m > 0) return `${h}h ${m}m`;
-    if (h > 0) return `${h}h`;
-    return `${m}m`;
-  };
 
   const Quadrant = ({ title, color, subtitle, blocksList, percent }: { title: string, color: string, subtitle: string, blocksList: TimeBlock[], percent: number }) => (
     <Paper

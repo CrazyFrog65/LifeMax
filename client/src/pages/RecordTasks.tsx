@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Button, Snackbar, Alert, Tooltip, Menu, MenuItem } from '@mui/material';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 import RestartAltRoundedIcon from '@mui/icons-material/RestartAltRounded';
@@ -164,7 +164,7 @@ export default function RecordTasks() {
           
           <Box sx={{ display: 'flex', gap: 1, justifyContent: { xs: 'space-between', sm: 'flex-start' } }}>
             <Tooltip title="Undo last action (Ctrl+Z)">
-              <span style={{ display: 'inline-flex', flex: { xs: 1, sm: 'initial' } }}>
+              <Box component="span" sx={{ display: 'inline-flex', flex: { xs: 1, sm: 'initial' } }}>
                 <Button
                   variant="outlined"
                   onClick={handleUndo}
@@ -173,7 +173,7 @@ export default function RecordTasks() {
                 >
                   <UndoRoundedIcon fontSize="small" />
                 </Button>
-              </span>
+              </Box>
             </Tooltip>
             <Button
               variant="contained"

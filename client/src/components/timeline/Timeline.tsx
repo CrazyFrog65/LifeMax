@@ -15,7 +15,7 @@ interface TimelineProps {
   onDragStart: (e: React.PointerEvent, block: TimeBlock, mode: 'top' | 'bottom' | 'body') => void;
   onContextMenu: (e: React.MouseEvent, block: TimeBlock) => void;
   onDoubleClick: (e: React.MouseEvent, ref: React.RefObject<HTMLDivElement | null>) => void;
-  scrollContainerRef: React.RefObject<HTMLDivElement>;
+  scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const TOTAL_HEIGHT = 24 * 60;

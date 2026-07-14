@@ -21,7 +21,6 @@ import {
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
-import CategoryRoundedIcon from '@mui/icons-material/CategoryRounded';
 import axios from '../utils/apiClient';
 
 interface Category {

@@ -1,5 +1,5 @@
 import type { TimeBlock, Category } from '../types/timeline';
-import { toMins, toTimeStr } from './time';
+import { toMins } from './time';
 
 export const generateDefaultBlocks = (categories: Category[]): TimeBlock[] => {
   if (categories.length === 0) return [];
@@ -30,6 +30,6 @@ export const generateDefaultBlocks = (categories: Category[]): TimeBlock[] => {
   return defaultBlocks;
 };
 
-export const repairTimelineGaps = (dbBlocks: TimeBlock[], categories: Category[]): TimeBlock[] => {
+export const repairTimelineGaps = (dbBlocks: TimeBlock[], _categories: Category[]): TimeBlock[] => {
   return [...dbBlocks].sort((a, b) => toMins(a.startTime) - toMins(b.startTime));
 };

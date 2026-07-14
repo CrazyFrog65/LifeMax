@@ -12,8 +12,7 @@ import {
   AreaChart,
   BarChart,
   Bar,
-  Legend,
-  ComposedChart
+  Legend
 } from 'recharts';
 import axios from '../utils/apiClient';
 
