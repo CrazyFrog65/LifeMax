@@ -1,12 +1,10 @@
-import { Box, Paper, Typography, Avatar, Chip, Button } from '@mui/material';
-
-const tasks = [
-  { user: 'Alex', initials: 'A', color: '#6C9EFF', task: 'Interview: API engineer', due: 'Due' },
-  { user: 'Alex', initials: 'A', color: '#6C9EFF', task: 'Reflection session', due: 'Tomorrow' },
-  { user: 'LifeMa', initials: 'L', color: '#A78BFA', task: "Today's priorities", due: 'Due' },
-];
+import { Box, Paper, Typography, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import AssignmentTurnedInRoundedIcon from '@mui/icons-material/AssignmentTurnedInRounded';
 
 export default function MyTasks() {
+  const navigate = useNavigate();
+
   return (
     <Paper
       elevation={0}
@@ -18,80 +16,22 @@ export default function MyTasks() {
         opacity: 0,
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Typography sx={{ fontWeight: 700, fontSize: '1.05rem' }}>My tasks</Typography>
       </Box>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="body2" sx={{ color: '#8B949E', fontSize: '0.82rem' }}>
-          3 active tasks
+      {/* Empty State */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, py: 3 }}>
+        <AssignmentTurnedInRoundedIcon sx={{ fontSize: 40, color: 'rgba(255,255,255,0.1)' }} />
+        <Typography variant="body2" sx={{ color: '#8B949E', fontSize: '0.85rem', textAlign: 'center' }}>
+          You have no tasks logged for today.
         </Typography>
-        <Chip
-          label="UPGRADE PLAN"
-          size="small"
-          sx={{
-            bgcolor: '#3FB950',
-            color: '#fff',
-            fontWeight: 700,
-            fontSize: '0.65rem',
-            height: 24,
-            letterSpacing: '0.05em',
-            transition: 'all 0.2s ease',
-            '&:hover': {
-              bgcolor: '#2EA043',
-              transform: 'scale(1.05)',
-            },
-          }}
-        />
       </Box>
 
-      {/* Task list */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 2.5 }}>
-        {tasks.map((t, idx) => (
-          <Box
-            key={idx}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5,
-              py: 1,
-              px: 1.5,
-              borderRadius: '10px',
-              cursor: 'pointer',
-              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-              '&:hover': {
-                bgcolor: 'rgba(255,255,255,0.04)',
-                transform: 'translateX(4px)',
-              },
-            }}
-          >
-            <Avatar sx={{ width: 32, height: 32, bgcolor: t.color, fontSize: '0.75rem', fontWeight: 600 }}>
-              {t.initials}
-            </Avatar>
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography sx={{ fontSize: '0.82rem', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <Box component="span" sx={{ color: '#8B949E' }}>{t.user}</Box>
-                <Box component="span" sx={{ color: '#8B949E', mx: 0.8 }}>·</Box>
-                {t.task}
-              </Typography>
-            </Box>
-            <Typography
-              variant="caption"
-              sx={{
-                color: t.due === 'Due' ? '#F85149' : '#D29922',
-                fontWeight: 500,
-                fontSize: '0.75rem',
-              }}
-            >
-              {t.due}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
-
-      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
         <Button
           variant="outlined"
+          onClick={() => navigate('/record-tasks')}
           sx={{
             borderColor: 'rgba(255,255,255,0.15)',
             color: '#E6EDF3',
@@ -106,7 +46,7 @@ export default function MyTasks() {
             },
           }}
         >
-          TASKS
+          RECORD NEW TASK
         </Button>
       </Box>
     </Paper>

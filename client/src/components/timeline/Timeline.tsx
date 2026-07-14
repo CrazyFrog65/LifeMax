@@ -32,6 +32,24 @@ export const Timeline: React.FC<TimelineProps> = ({
   scrollContainerRef
 }) => {
   const timelineRef = useRef<HTMLDivElement>(null);
+  const lastTapRef = React.useRef<{ time: number; x: number; y: number } | null>(null);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (e.pointerType !== 'touch') return;
+
+    const now = Date.now();
+    const lastTap = lastTapRef.current;
+
+    if (lastTap && now - lastTap.time < 300) {
+      if (Math.abs(e.clientX - lastTap.x) < 20 && Math.abs(e.clientY - lastTap.y) < 20) {
+        onDoubleClick(e as unknown as React.MouseEvent, timelineRef);
+        lastTapRef.current = null;
+        return;
+      }
+    }
+
+    lastTapRef.current = { time: now, x: e.clientX, y: e.clientY };
+  };
 
   return (
     <Paper 
@@ -51,6 +69,7 @@ export const Timeline: React.FC<TimelineProps> = ({
         <Box 
           ref={timelineRef}
           onDoubleClick={(e) => onDoubleClick(e, timelineRef)}
+          onPointerDown={handlePointerDown}
           sx={{ flex: 1, position: 'relative', cursor: 'crosshair' }}
         >
           <Box sx={{ position: 'relative', top: 12, height: TOTAL_HEIGHT }}>

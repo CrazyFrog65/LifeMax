@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function MiniCalendar() {
-  const today = dayjs('2026-07-10');
+  const today = dayjs();
   const startOfWeek = today.startOf('week'); // Sunday
 
   const weekDates = Array.from({ length: 7 }, (_, i) => {

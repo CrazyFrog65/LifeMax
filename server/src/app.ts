@@ -3,6 +3,7 @@ import cors from "cors";
 import pinoHttpModule from "pino-http";
 import { logger } from "./config/logger.js";
 import routes from "./routes/index.js";
+import authRoutes from "./routes/auth.routes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { requireAuth } from "./middleware/auth.js";
 
@@ -22,6 +23,7 @@ app.get("/", (req, res) => {
   res.json({ success: true, message: "LifeMax API is active and running!" });
 });
 
+app.use("/api/auth", authRoutes);
 app.use("/api", requireAuth, routes);
 
 app.use(errorHandler);

@@ -7,6 +7,7 @@ import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import CategoryRoundedIcon from '@mui/icons-material/CategoryRounded';
+import { useAuth } from '../contexts/AuthContext';
 
 const navItems = [
   { label: 'Dashboard', icon: <DashboardRoundedIcon />, path: '/' },
@@ -29,6 +30,7 @@ interface SidebarProps {
 export default function Sidebar({ onClose, isMobile }: SidebarProps = {}) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const handleNavClick = (path: string) => {
     if (path) {
@@ -37,6 +39,23 @@ export default function Sidebar({ onClose, isMobile }: SidebarProps = {}) {
         onClose();
       }
     }
+  };
+
+  const handleBottomItemClick = (label: string) => {
+    if (label === 'Sign out') {
+      logout();
+      navigate('/login');
+    }
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return 'U';
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
   };
 
   return (
@@ -54,27 +73,37 @@ export default function Sidebar({ onClose, isMobile }: SidebarProps = {}) {
       }}
     >
       {/* User profile */}
-      <Box sx={{ px: 2.5, mb: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <Avatar
-          sx={{
-            width: 40,
-            height: 40,
-            bgcolor: '#6C9EFF',
-            fontSize: '0.95rem',
-            fontWeight: 600,
-          }}
-        >
-          AR
-        </Avatar>
-        <Box>
-          <Typography variant="subtitle2" sx={{ color: '#E6EDF3', fontWeight: 600, fontSize: '0.85rem', lineHeight: 1.3 }}>
-            Alex Rivera
-          </Typography>
-          <Typography variant="caption" sx={{ color: '#8B949E', fontSize: '0.7rem' }}>
-            alex@lifemax.app
-          </Typography>
+      {user && (
+        <Box sx={{ px: 2.5, mb: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Avatar
+            sx={{
+              width: 40,
+              height: 40,
+              bgcolor: '#6C9EFF',
+              fontSize: '0.95rem',
+              fontWeight: 600,
+            }}
+          >
+            {getInitials(user.name)}
+          </Avatar>
+          <Box sx={{ overflow: 'hidden' }}>
+            <Typography
+              variant="subtitle2"
+              noWrap
+              sx={{ color: '#E6EDF3', fontWeight: 600, fontSize: '0.85rem', lineHeight: 1.3 }}
+            >
+              {user.name}
+            </Typography>
+            <Typography
+              variant="caption"
+              noWrap
+              sx={{ color: '#8B949E', fontSize: '0.7rem', display: 'block' }}
+            >
+              {user.email}
+            </Typography>
+          </Box>
         </Box>
-      </Box>
+      )}
 
       {/* Main nav */}
       <List sx={{ px: 1, flex: 1 }}>
@@ -125,6 +154,7 @@ export default function Sidebar({ onClose, isMobile }: SidebarProps = {}) {
         {bottomItems.map((item) => (
           <ListItemButton
             key={item.label}
+            onClick={() => handleBottomItemClick(item.label)}
             sx={{
               borderRadius: '10px',
               mb: 0.3,

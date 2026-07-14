@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Box, Typography, Chip } from '@mui/material';
 import type { TimeBlock, Category } from '../../types/timeline';
 import { displayTime, toMins } from '../../utils/time';
@@ -30,12 +30,75 @@ export const TimelineBlock = React.memo(({
   const isNone = category?.name.toLowerCase() === 'none' || category?.name.toLowerCase() === 'nothing specific';
   const isEmpty = isNone && !block.activityName;
 
+  const [isPopped, setIsPopped] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  const handleBodyPointerDown = (e: React.PointerEvent) => {
+    if (e.button !== 0) return;
+
+    const isMobile = e.pointerType === 'touch' || window.innerWidth <= 768;
+
+    if (isMobile) {
+      e.persist();
+
+      const startX = e.clientX;
+      const startY = e.clientY;
+
+      const clearDragTimer = () => {
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+          timerRef.current = null;
+        }
+      };
+
+      const onMove = (moveEv: PointerEvent) => {
+        if (Math.abs(moveEv.clientX - startX) > 10 || Math.abs(moveEv.clientY - startY) > 10) {
+          clearDragTimer();
+          window.removeEventListener('pointermove', onMove);
+        }
+      };
+
+      const onUp = () => {
+        clearDragTimer();
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
+        setIsPopped(false);
+      };
+
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+
+      timerRef.current = setTimeout(() => {
+        clearDragTimer();
+        window.removeEventListener('pointermove', onMove);
+        setIsPopped(true);
+
+        onDragStart(e, block, 'body');
+
+        const onDragEnd = () => {
+          setIsPopped(false);
+          window.removeEventListener('pointerup', onDragEnd);
+        };
+        window.addEventListener('pointerup', onDragEnd);
+      }, 200);
+
+    } else {
+      onDragStart(e, block, 'body');
+    }
+  };
+
   return (
     <Box
       id={`block-${block.id}`}
-      onPointerDown={(e) => {
-        if (e.button === 0) onDragStart(e, block, 'body');
-      }}
+      onPointerDown={handleBodyPointerDown}
       onContextMenu={(e) => {
         e.preventDefault();
         onContextMenu(e, block);
@@ -50,17 +113,18 @@ export const TimelineBlock = React.memo(({
         borderLeft: isEmpty ? 'none' : `4px solid rgba(0, 0, 0, 0.18)`,
         border: isEmpty ? 'none' : '1px solid rgba(0, 0, 0, 0.08)',
         borderRadius: isEmpty ? 0 : '8px',
-        boxShadow: isEmpty ? 'none' : '0 1px 3px rgba(0, 0, 0, 0.15)',
+        boxShadow: isPopped ? '0 8px 16px rgba(0, 0, 0, 0.3)' : (isEmpty ? 'none' : '0 1px 3px rgba(0, 0, 0, 0.15)'),
+        transform: isPopped ? 'scale(1.02)' : 'none',
         overflow: 'hidden',
         cursor: 'grab',
-        transition: 'box-shadow 0.2s ease, filter 0.2s ease, background-color 0.2s ease',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, background-color 0.2s ease',
         '&:hover': {
           bgcolor: isEmpty ? 'rgba(255,255,255,0.02)' : color,
-          boxShadow: isEmpty ? 'none' : '0 3px 6px rgba(0, 0, 0, 0.2)',
+          boxShadow: isPopped ? '0 8px 16px rgba(0, 0, 0, 0.3)' : (isEmpty ? 'none' : '0 3px 6px rgba(0, 0, 0, 0.2)'),
           filter: isEmpty ? 'none' : 'brightness(1.05)'
         },
         '&:active': { cursor: 'grabbing' },
-        zIndex: isEmpty ? 5 : 10,
+        zIndex: isPopped ? 20 : (isEmpty ? 5 : 10),
         touchAction: 'none'
       }}
     >
