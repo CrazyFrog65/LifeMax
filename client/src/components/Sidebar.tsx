@@ -4,7 +4,6 @@ import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import EditCalendarRoundedIcon from '@mui/icons-material/EditCalendarRounded';
 import GridViewRoundedIcon from '@mui/icons-material/GridViewRounded';
 import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
-import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import CategoryRoundedIcon from '@mui/icons-material/CategoryRounded';

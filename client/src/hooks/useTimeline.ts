@@ -38,7 +38,7 @@ export function useTimeline(
     setEffectiveRatio(productiveMinutes / 1440);
   }, [blocks, categories]);
 
-  const moveBlockBoundaries = useCallback((id: string, mode: 'top' | 'bottom' | 'body', newStartMins: number, newEndMins: number) => {
+  const moveBlockBoundaries = useCallback((id: string, _mode: 'top' | 'bottom' | 'body', newStartMins: number, newEndMins: number) => {
     setBlocks(prev => {
       const index = prev.findIndex(b => b.id === id);
       if (index === -1) return prev;
@@ -149,7 +149,7 @@ export function useTimeline(
     window.addEventListener('pointerup', onUp);
   }, [blocks, pushHistory, openPopover, closePopover, moveBlockBoundaries]);
 
-  const handleTimelineDoubleClick = useCallback((e: React.MouseEvent, timelineRef: React.RefObject<HTMLDivElement>) => {
+  const handleTimelineDoubleClick = useCallback((e: React.MouseEvent, timelineRef: React.RefObject<HTMLDivElement | null>) => {
     if (!timelineRef.current) return;
     const rect = timelineRef.current.getBoundingClientRect();
     const y = e.clientY - rect.top - 12; // Adjust for pt: '12px' padding

@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Paper, AvatarGroup, Avatar, Chip } from '@mui/material';
+import { Box, Typography, Button, Paper, AvatarGroup, Avatar } from '@mui/material';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 
 export default function WelcomeSection() {
