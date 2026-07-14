@@ -64,23 +64,21 @@ export const dayLogService = {
     );
 
     // 2. Calculate Effective Ratio
-    // Total Minutes = sum of all block durations
-    // Nothing Specific Minutes = sum of block durations where category is "Nothing Specific"
+    // Treated as: productiveMinutes / 1440
+    // Unfilled parts of the day are non-productive ("None")
     
     const categories = await prisma.category.findMany({ where: { userId } });
-    const nothingSpecificCat = categories.find(c => c.name.toLowerCase() === "nothing specific");
+    const nothingSpecificCat = categories.find(c => c.name.toLowerCase() === "nothing specific" || c.name.toLowerCase() === "none");
     
-    let totalMinutes = 0;
-    let nsMinutes = 0;
+    let productiveMinutes = 0;
 
     for (const b of blocksWithActivityIds) {
-      totalMinutes += b.durationMinutes;
-      if (nothingSpecificCat && b.categoryId === nothingSpecificCat.id) {
-        nsMinutes += b.durationMinutes;
+      if (!nothingSpecificCat || b.categoryId !== nothingSpecificCat.id) {
+        productiveMinutes += b.durationMinutes;
       }
     }
 
-    const effectiveRatio = totalMinutes > 0 ? (totalMinutes - nsMinutes) / totalMinutes : 0;
+    const effectiveRatio = productiveMinutes / 1440;
 
     // 3. Save to database via repository
     return dayLogRepository.upsertDayLogWithBlocks(

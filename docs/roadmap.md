@@ -12,6 +12,8 @@ This roadmap highlights milestones, phases, and feature progression for LifeMax.
 - [ ] Front-end Dashboard interface integration.
 
 ## Phase 2: Refinement & Advanced Tracking (V2)
+- [ ] Timeline Editor Polish: Zoom levels (15/30/60min), Better drag preview, Multi-select, Copy/Paste, Keyboard shortcuts, Activity search, Animations, and Virtualized rendering.
+- [ ] Defaults template: Allow users to specify their default daily schedule structure.
 - [ ] Pomodoro Timer built-in.
 - [ ] Google Calendar two-way synchronization.
 - [ ] Enhanced journal & mood analytics.

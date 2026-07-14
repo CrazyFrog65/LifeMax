@@ -22,9 +22,23 @@ const bottomItems = [
   { label: 'Sign out', icon: <LogoutRoundedIcon /> },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+  isMobile?: boolean;
+}
+
+export default function Sidebar({ onClose, isMobile }: SidebarProps = {}) {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleNavClick = (path: string) => {
+    if (path) {
+      navigate(path);
+      if (isMobile && onClose) {
+        onClose();
+      }
+    }
+  };
 
   return (
     <Box
@@ -69,7 +83,7 @@ export default function Sidebar() {
           <ListItemButton
             key={item.label}
             selected={location.pathname === item.path}
-            onClick={() => item.path && navigate(item.path)}
+            onClick={() => handleNavClick(item.path)}
             sx={{
               borderRadius: '10px',
               mb: 0.3,

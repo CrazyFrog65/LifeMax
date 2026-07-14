@@ -14,10 +14,11 @@ import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import ChatBubbleOutlineRoundedIcon from '@mui/icons-material/ChatBubbleOutlineRounded';
 import NotificationsNoneRoundedIcon from '@mui/icons-material/NotificationsNoneRounded';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
+import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import { useState } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
 
-export default function TopBar() {
+export default function TopBar({ onMenuClick, showMenuButton }: { onMenuClick?: () => void; showMenuButton?: boolean } = {}) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { useAmPm, setUseAmPm } = useSettings();
 
@@ -33,46 +34,55 @@ export default function TopBar() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        px: 3.5,
+        px: { xs: 2, sm: 3.5 },
         py: 1.5,
         borderBottom: '1px solid rgba(255,255,255,0.06)',
         animation: 'fadeIn 0.4s ease forwards',
+        gap: 2
       }}
     >
-      {/* Search */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          bgcolor: 'rgba(255,255,255,0.04)',
-          borderRadius: '10px',
-          px: 2,
-          py: 0.8,
-          width: 340,
-          border: '1px solid rgba(255,255,255,0.06)',
-          transition: 'all 0.3s ease',
-          '&:hover': {
-            bgcolor: 'rgba(255,255,255,0.06)',
-            borderColor: 'rgba(255,255,255,0.1)',
-          },
-          '&:focus-within': {
-            borderColor: '#6C9EFF',
-            bgcolor: 'rgba(108, 158, 255, 0.05)',
-            boxShadow: '0 0 0 3px rgba(108, 158, 255, 0.1)',
-          },
-        }}
-      >
-        <InputBase
-          placeholder="Search tasks, goals, or habits"
+      <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, gap: 1 }}>
+        {showMenuButton && (
+          <IconButton onClick={onMenuClick} sx={{ color: '#8B949E', p: 0.5 }}>
+            <MenuRoundedIcon />
+          </IconButton>
+        )}
+        
+        {/* Search */}
+        <Box
           sx={{
-            flex: 1,
-            fontSize: '0.85rem',
-            color: '#E6EDF3',
-            '& input::placeholder': { color: '#8B949E', opacity: 1 },
+            display: { xs: 'none', md: 'flex' },
+            alignItems: 'center',
+            gap: 1,
+            bgcolor: 'rgba(255,255,255,0.04)',
+            borderRadius: '10px',
+            px: 2,
+            py: 0.8,
+            width: 340,
+            border: '1px solid rgba(255,255,255,0.06)',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              bgcolor: 'rgba(255,255,255,0.06)',
+              borderColor: 'rgba(255,255,255,0.1)',
+            },
+            '&:focus-within': {
+              borderColor: '#6C9EFF',
+              bgcolor: 'rgba(108, 158, 255, 0.05)',
+              boxShadow: '0 0 0 3px rgba(108, 158, 255, 0.1)',
+            },
           }}
-        />
-        <SearchRoundedIcon sx={{ color: '#8B949E', fontSize: 20 }} />
+        >
+          <InputBase
+            placeholder="Search tasks, goals, or habits"
+            sx={{
+              flex: 1,
+              fontSize: '0.85rem',
+              color: '#E6EDF3',
+              '& input::placeholder': { color: '#8B949E', opacity: 1 },
+            }}
+          />
+          <SearchRoundedIcon sx={{ color: '#8B949E', fontSize: 20 }} />
+        </Box>
       </Box>
 
       {/* Right side */}
