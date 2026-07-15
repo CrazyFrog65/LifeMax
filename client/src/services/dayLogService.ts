@@ -15,8 +15,8 @@ export const fetchCategories = async (): Promise<Category[]> => {
   }
 };
 
-export const fetchDayLog = async (date: string, categories: Category[]): Promise<{ blocks: TimeBlock[]; satisfied: boolean }> => {
-  if (categories.length === 0) return { blocks: [], satisfied: false };
+export const fetchDayLogWithStatus = async (date: string, categories: Category[]): Promise<{ blocks: TimeBlock[]; satisfied: boolean; hasData: boolean }> => {
+  if (categories.length === 0) return { blocks: [], satisfied: false, hasData: false };
   try {
     const res = await axios.get(`http://localhost:5000/api/day-logs/${date}`);
     if (res.data.success && res.data.data) {
@@ -61,11 +61,13 @@ export const fetchDayLog = async (date: string, categories: Category[]): Promise
       return {
         blocks: repairTimelineGaps(dbBlocks, categories),
         satisfied: res.data.data.satisfied || false,
+        hasData: true,
       };
     } else {
       return {
         blocks: generateDefaultBlocks(categories),
         satisfied: false,
+        hasData: false,
       };
     }
   } catch (err) {
@@ -73,8 +75,14 @@ export const fetchDayLog = async (date: string, categories: Category[]): Promise
     return {
       blocks: generateDefaultBlocks(categories),
       satisfied: false,
+      hasData: false,
     };
   }
+};
+
+export const fetchDayLog = async (date: string, categories: Category[]): Promise<{ blocks: TimeBlock[]; satisfied: boolean }> => {
+  const result = await fetchDayLogWithStatus(date, categories);
+  return { blocks: result.blocks, satisfied: result.satisfied };
 };
 
 export const saveDayLog = async (date: string, blocks: TimeBlock[], satisfied: boolean) => {

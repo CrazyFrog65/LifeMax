@@ -3,6 +3,7 @@ import { Box, Typography, Button, Snackbar, Alert, Tooltip, Menu, MenuItem, Chec
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 import RestartAltRoundedIcon from '@mui/icons-material/RestartAltRounded';
 import UndoRoundedIcon from '@mui/icons-material/UndoRounded';
+import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
 import SentimentSatisfiedAltRoundedIcon from '@mui/icons-material/SentimentSatisfiedAltRounded';
 import SentimentNeutralRoundedIcon from '@mui/icons-material/SentimentNeutralRounded';
 import dayjs from 'dayjs';
@@ -12,7 +13,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { useSettings } from '../contexts/SettingsContext';
 import type { Category, TimeBlock } from '../types/timeline';
-import { fetchCategories, fetchDayLog, saveDayLog, resetDayLog } from '../services/dayLogService';
+import { fetchCategories, fetchDayLog, fetchDayLogWithStatus, saveDayLog, resetDayLog } from '../services/dayLogService';
 import { useCurrentTime } from '../hooks/useCurrentTime';
 import { useUndoHistory } from '../hooks/useUndoHistory';
 import { useTimeline } from '../hooks/useTimeline';
@@ -26,6 +27,7 @@ export default function RecordTasks() {
   const [isSaving, setIsSaving] = useState(false);
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [toastSeverity, setToastSeverity] = useState<'success' | 'warning' | 'error' | 'info'>('success');
   const [satisfied, setSatisfied] = useState(false);
 
   const [popoverState, setPopoverState] = useState<{ id: string, top: number, left: number } | null>(null);
@@ -85,9 +87,13 @@ export default function RecordTasks() {
       setBlocks(dbBlocks);
       setSatisfied(dbSatisfied);
       setToastMessage('Tasks successfully saved!');
+      setToastSeverity('success');
       setToastOpen(true);
     } catch (err) {
       console.error('Failed to save', err);
+      setToastMessage('Failed to save tasks.');
+      setToastSeverity('error');
+      setToastOpen(true);
     } finally {
       setIsSaving(false);
     }
@@ -102,9 +108,43 @@ export default function RecordTasks() {
       setSatisfied(dbSatisfied);
       clearHistory();
       setToastMessage('Tasks reset to default.');
+      setToastSeverity('success');
       setToastOpen(true);
     } catch (err) {
       console.error('Failed to delete', err);
+      setToastMessage('Failed to reset tasks.');
+      setToastSeverity('error');
+      setToastOpen(true);
+    }
+  };
+
+  const handleCopyPreviousDay = async () => {
+    const prevDate = dayjs(date).subtract(1, 'day').format('YYYY-MM-DD');
+    try {
+      const { blocks: prevBlocks, satisfied: prevSatisfied, hasData } = await fetchDayLogWithStatus(prevDate, categories);
+      if (!hasData) {
+        setToastMessage(`No logged tasks found for the previous day (${dayjs(prevDate).format('MMM DD, YYYY')}).`);
+        setToastSeverity('warning');
+        setToastOpen(true);
+        return;
+      }
+      
+      const copiedBlocks = prevBlocks.map(b => ({
+        ...b,
+        id: Math.random().toString(),
+      }));
+
+      pushHistory(blocks);
+      setBlocks(copiedBlocks);
+      setSatisfied(prevSatisfied);
+      setToastMessage(`Successfully copied schedule from ${dayjs(prevDate).format('MMM DD, YYYY')}. Make sure to save!`);
+      setToastSeverity('success');
+      setToastOpen(true);
+    } catch (err) {
+      console.error('Failed to copy previous day', err);
+      setToastMessage("Error copying previous day's tasks.");
+      setToastSeverity('error');
+      setToastOpen(true);
     }
   };
 
@@ -169,7 +209,7 @@ export default function RecordTasks() {
             </LocalizationProvider>
           </Box>
 
-          <Box sx={{ display: 'flex', gap: 1.5, justifyContent: { xs: 'space-between', sm: 'flex-start' }, flexShrink: 0 }}>
+          <Box sx={{ display: 'flex', gap: 1.5, justifyContent: { xs: 'space-between', sm: 'flex-start' }, flexShrink: 0, flexWrap: 'wrap' }}>
             <Tooltip title="Undo last action (Ctrl+Z)">
               <Box component="span" sx={{ display: 'inline-flex', flex: { xs: 1, sm: 'initial' } }}>
                 <Button
@@ -182,6 +222,22 @@ export default function RecordTasks() {
                 </Button>
               </Box>
             </Tooltip>
+            <Button
+              variant="outlined"
+              startIcon={<ContentCopyRoundedIcon />}
+              onClick={handleCopyPreviousDay}
+              sx={{
+                flex: { xs: 2, sm: 'initial' },
+                whiteSpace: 'nowrap',
+                borderColor: 'rgba(255,255,255,0.1)',
+                color: '#E6EDF3',
+                fontWeight: 600,
+                px: 2.5,
+                '&:hover': { borderColor: '#6C9EFF', bgcolor: 'rgba(108, 158, 255, 0.08)' }
+              }}
+            >
+              Copy Previous Day
+            </Button>
             <Button
               variant="contained"
               startIcon={<SaveRoundedIcon />}
@@ -200,14 +256,18 @@ export default function RecordTasks() {
             >
               {isSaving ? 'Saving...' : 'Save Day'}
             </Button>
-            <Button
-              variant="outlined"
-              onClick={handleReset}
-              color="error"
-              sx={{ width: '100%', minWidth: 0, px: 2, borderColor: 'rgba(248, 81, 73, 0.3)', flex: { xs: 1, sm: 'initial' } }}
-            >
-              <RestartAltRoundedIcon fontSize="small" />
-            </Button>
+            <Tooltip title="Reset this day (delete all tasks)">
+              <Box component="span" sx={{ display: 'inline-flex', flex: { xs: 1, sm: 'initial' } }}>
+                <Button
+                  variant="outlined"
+                  onClick={handleReset}
+                  color="error"
+                  sx={{ width: '100%', minWidth: 0, px: 2, borderColor: 'rgba(248, 81, 73, 0.3)' }}
+                >
+                  <RestartAltRoundedIcon fontSize="small" />
+                </Button>
+              </Box>
+            </Tooltip>
           </Box>
         </Box>
       </Box>
@@ -336,7 +396,17 @@ export default function RecordTasks() {
       </Menu>
 
       <Snackbar open={toastOpen} autoHideDuration={4000} onClose={() => setToastOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-        <Alert onClose={() => setToastOpen(false)} severity="success" variant="filled" sx={{ width: '100%', bgcolor: '#3FB950', color: '#fff', fontWeight: 600 }}>
+        <Alert
+          onClose={() => setToastOpen(false)}
+          severity={toastSeverity}
+          variant="filled"
+          sx={{
+            width: '100%',
+            bgcolor: toastSeverity === 'success' ? '#3FB950' : toastSeverity === 'warning' ? '#D29922' : toastSeverity === 'error' ? '#F85149' : '#388BFD',
+            color: '#fff',
+            fontWeight: 600
+          }}
+        >
           {toastMessage}
         </Alert>
       </Snackbar>
