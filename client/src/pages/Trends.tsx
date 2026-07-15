@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Grid } from '@mui/material';
+import SentimentSatisfiedAltRoundedIcon from '@mui/icons-material/SentimentSatisfiedAltRounded';
 import {
   LineChart,
   Line,
@@ -59,6 +60,7 @@ export default function Trends() {
   const [sleepTrend, setSleepTrend] = useState<any[]>([]);
   const [topActivities, setTopActivities] = useState<any[]>([]);
   const [categoriesList, setCategoriesList] = useState<string[]>([]);
+  const [satisfiedDaysCount, setSatisfiedDaysCount] = useState<number>(0);
 
   useEffect(() => {
     fetchTrends();
@@ -75,6 +77,7 @@ export default function Trends() {
         setEisenhowerDistribution(res.data.data.eisenhowerDistribution);
         setSleepTrend(res.data.data.sleepTrend);
         setTopActivities(res.data.data.topActivities);
+        setSatisfiedDaysCount(res.data.data.satisfiedDaysCount || 0);
 
         // Extract unique categories for AreaChart
         const cats = new Set<string>();
@@ -100,6 +103,58 @@ export default function Trends() {
           Track how your habits and effective ratio fluctuate over time.
         </Typography>
       </Box>
+
+      {/* Summary Cards */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: 3,
+              bgcolor: '#161B22',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2.5,
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: 4,
+                height: '100%',
+                bgcolor: '#3FB950',
+              }
+            }}
+          >
+            <Box
+              sx={{
+                width: 52,
+                height: 52,
+                borderRadius: 3,
+                bgcolor: 'rgba(63, 185, 80, 0.12)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#3FB950',
+              }}
+            >
+              <SentimentSatisfiedAltRoundedIcon sx={{ fontSize: 32 }} />
+            </Box>
+            <Box>
+              <Typography sx={{ color: '#8B949E', fontSize: '0.875rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Day Satisfaction
+              </Typography>
+              <Typography sx={{ color: '#E6EDF3', fontSize: '1.25rem', fontWeight: 600, mt: 0.5 }}>
+                Out of 30 days, <span style={{ color: '#3FB950', fontWeight: 800, fontSize: '1.5rem' }}>{satisfiedDaysCount}</span> {satisfiedDaysCount === 1 ? 'day' : 'days'} you were satisfied
+              </Typography>
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
 
       <Grid container spacing={4}>
         {/* Weekly Trend (Effective Ratio) */}

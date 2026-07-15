@@ -235,6 +235,8 @@ export const analyticsService = {
       .sort((a, b) => b.hours - a.hours)
       .slice(0, 10);
 
+    const satisfiedDaysCount = dayLogs.filter(log => log.satisfied === true).length;
+
     return {
       weeklyTrend,
       monthlyTrend,
@@ -242,7 +244,8 @@ export const analyticsService = {
       productiveVsUnproductive,
       eisenhowerDistribution,
       sleepTrend,
-      topActivities
+      topActivities,
+      satisfiedDaysCount
     };
   },
 };

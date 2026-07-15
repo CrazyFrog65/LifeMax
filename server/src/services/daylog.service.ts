@@ -14,6 +14,7 @@ export const dayLogService = {
     data: {
       notes?: string;
       sleepHours?: number;
+      satisfied?: boolean;
       blocks: {
         startTime: string; // ISO or HH:mm
         endTime: string;
@@ -87,6 +88,7 @@ export const dayLogService = {
       {
         notes: data.notes,
         sleepHours: data.sleepHours,
+        satisfied: !!data.satisfied,
         effectiveRatio: parseFloat(effectiveRatio.toFixed(2)),
       },
       blocksWithActivityIds

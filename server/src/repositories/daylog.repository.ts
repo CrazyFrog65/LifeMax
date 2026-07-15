@@ -16,7 +16,7 @@ export const dayLogRepository = {
   upsertDayLogWithBlocks: async (
     userId: string,
     date: Date,
-    dayLogData: { notes?: string; sleepHours?: number; effectiveRatio?: number },
+    dayLogData: { notes?: string; sleepHours?: number; effectiveRatio?: number; satisfied?: boolean },
     blocksData: any[] // We'll type this properly in service
   ) => {
     return prisma.$transaction(async (tx) => {

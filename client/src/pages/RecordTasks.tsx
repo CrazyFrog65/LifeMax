@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Button, Snackbar, Alert, Tooltip, Menu, MenuItem } from '@mui/material';
+import { Box, Typography, Button, Snackbar, Alert, Tooltip, Menu, MenuItem, Checkbox } from '@mui/material';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 import RestartAltRoundedIcon from '@mui/icons-material/RestartAltRounded';
 import UndoRoundedIcon from '@mui/icons-material/UndoRounded';
+import SentimentSatisfiedAltRoundedIcon from '@mui/icons-material/SentimentSatisfiedAltRounded';
+import SentimentNeutralRoundedIcon from '@mui/icons-material/SentimentNeutralRounded';
 import dayjs from 'dayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -24,6 +26,7 @@ export default function RecordTasks() {
   const [isSaving, setIsSaving] = useState(false);
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [satisfied, setSatisfied] = useState(false);
 
   const [popoverState, setPopoverState] = useState<{ id: string, top: number, left: number } | null>(null);
   const [contextMenuState, setContextMenuState] = useState<{ id: string, top: number, left: number } | null>(null);
@@ -64,8 +67,9 @@ export default function RecordTasks() {
 
   useEffect(() => {
     const loadDay = async () => {
-      const dbBlocks = await fetchDayLog(date, categories);
+      const { blocks: dbBlocks, satisfied: dbSatisfied } = await fetchDayLog(date, categories);
       setBlocks(dbBlocks);
+      setSatisfied(dbSatisfied);
       clearHistory();
     };
     if (categories.length > 0) {
@@ -76,9 +80,10 @@ export default function RecordTasks() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await saveDayLog(date, blocks);
-      const dbBlocks = await fetchDayLog(date, categories);
+      await saveDayLog(date, blocks, satisfied);
+      const { blocks: dbBlocks, satisfied: dbSatisfied } = await fetchDayLog(date, categories);
       setBlocks(dbBlocks);
+      setSatisfied(dbSatisfied);
       setToastMessage('Tasks successfully saved!');
       setToastOpen(true);
     } catch (err) {
@@ -92,8 +97,9 @@ export default function RecordTasks() {
     if (!window.confirm('Reset this day? All saved data will be deleted.')) return;
     try {
       await resetDayLog(date);
-      const dbBlocks = await fetchDayLog(date, categories);
+      const { blocks: dbBlocks, satisfied: dbSatisfied } = await fetchDayLog(date, categories);
       setBlocks(dbBlocks);
+      setSatisfied(dbSatisfied);
       clearHistory();
       setToastMessage('Tasks reset to default.');
       setToastOpen(true);
@@ -217,6 +223,62 @@ export default function RecordTasks() {
         onDoubleClick={handleTimelineDoubleClick}
         scrollContainerRef={scrollContainerRef}
       />
+
+      <Box sx={{
+        mt: 3,
+        p: 2.5,
+        borderRadius: 3,
+        bgcolor: '#161B22',
+        border: '1px solid rgba(255, 255, 255, 0.06)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 2,
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          borderColor: 'rgba(108, 158, 255, 0.2)',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)'
+        }
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            bgcolor: satisfied ? 'rgba(63, 185, 80, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+            color: satisfied ? '#3FB950' : '#8B949E',
+            transition: 'all 0.3s ease'
+          }}>
+            {satisfied ? (
+              <SentimentSatisfiedAltRoundedIcon sx={{ fontSize: 24 }} />
+            ) : (
+              <SentimentNeutralRoundedIcon sx={{ fontSize: 24 }} />
+            )}
+          </Box>
+          <Box>
+            <Typography sx={{ color: '#E6EDF3', fontWeight: 600, fontSize: '1rem' }}>
+              Were you overall satisfied with this day?
+            </Typography>
+            <Typography sx={{ color: '#8B949E', fontSize: '0.85rem' }}>
+              Reflect on your productivity, mood, and overall achievements.
+            </Typography>
+          </Box>
+        </Box>
+        <Checkbox
+          checked={satisfied}
+          onChange={(e) => setSatisfied(e.target.checked)}
+          sx={{
+            color: 'rgba(255, 255, 255, 0.2)',
+            '&.Mui-checked': {
+              color: '#3FB950',
+            },
+            '& .MuiSvgIcon-root': { fontSize: 28 }
+          }}
+        />
+      </Box>
 
       <TimelinePopover
         popoverState={popoverState}

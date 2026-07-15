@@ -55,6 +55,7 @@ model DayLog {
   energy         Int? // 1-5 or 1-10 scale
   sleepHours     Float?
   effectiveRatio Float?
+  satisfied      Boolean     @default(false)
   userId         String
   user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   timeBlocks     TimeBlock[]

@@ -15,8 +15,8 @@ export const fetchCategories = async (): Promise<Category[]> => {
   }
 };
 
-export const fetchDayLog = async (date: string, categories: Category[]): Promise<TimeBlock[]> => {
-  if (categories.length === 0) return [];
+export const fetchDayLog = async (date: string, categories: Category[]): Promise<{ blocks: TimeBlock[]; satisfied: boolean }> => {
+  if (categories.length === 0) return { blocks: [], satisfied: false };
   try {
     const res = await axios.get(`http://localhost:5000/api/day-logs/${date}`);
     if (res.data.success && res.data.data) {
@@ -58,17 +58,26 @@ export const fetchDayLog = async (date: string, categories: Category[]): Promise
       });
       
       dbBlocks.sort((a, b) => toMins(a.startTime) - toMins(b.startTime));
-      return repairTimelineGaps(dbBlocks, categories);
+      return {
+        blocks: repairTimelineGaps(dbBlocks, categories),
+        satisfied: res.data.data.satisfied || false,
+      };
     } else {
-      return generateDefaultBlocks(categories);
+      return {
+        blocks: generateDefaultBlocks(categories),
+        satisfied: false,
+      };
     }
   } catch (err) {
     console.error('Failed to load day log', err);
-    return generateDefaultBlocks(categories);
+    return {
+      blocks: generateDefaultBlocks(categories),
+      satisfied: false,
+    };
   }
 };
 
-export const saveDayLog = async (date: string, blocks: TimeBlock[]) => {
+export const saveDayLog = async (date: string, blocks: TimeBlock[], satisfied: boolean) => {
   if (blocks.length === 0) return;
   const payloadBlocks = blocks.map((b) => {
     const startISO = dayjs(`${date}T${b.startTime}:00`).toISOString();
@@ -82,7 +91,7 @@ export const saveDayLog = async (date: string, blocks: TimeBlock[]) => {
       endTime: endObj.toISOString(),
     };
   });
-  await axios.post(`http://localhost:5000/api/day-logs/${date}/save`, { blocks: payloadBlocks });
+  await axios.post(`http://localhost:5000/api/day-logs/${date}/save`, { blocks: payloadBlocks, satisfied });
 };
 
 export const resetDayLog = async (date: string) => {
