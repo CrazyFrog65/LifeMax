@@ -23,19 +23,25 @@ export function useTimeline(
       setEffectiveRatio(0);
       return;
     }
-    const nsCat = categories.find((c) => c.name.toLowerCase() === 'nothing specific' || c.name.toLowerCase() === 'none');
-    let productiveMinutes = 0;
+    const sleepCat = categories.find((c) => c.name.toLowerCase() === 'sleep');
+    let sleepMinutes = 0;
+    let importantMinutes = 0;
 
     blocks.forEach((b) => {
       let dur = toMins(b.endTime) - toMins(b.startTime);
       if (dur <= 0 && b.endTime === '00:00') dur += 24 * 60;
       if (dur < 0) dur += 24 * 60;
-      if (!nsCat || b.categoryId !== nsCat.id) {
-        productiveMinutes += dur;
+
+      const isSleep = sleepCat && b.categoryId === sleepCat.id;
+      if (isSleep) {
+        sleepMinutes += dur;
+      } else if (b.isImportant) {
+        importantMinutes += dur;
       }
     });
 
-    setEffectiveRatio(productiveMinutes / 1440);
+    const awakeMinutes = 1440 - sleepMinutes;
+    setEffectiveRatio(awakeMinutes > 0 ? importantMinutes / awakeMinutes : 0);
   }, [blocks, categories]);
 
   const moveBlockBoundaries = useCallback((id: string, _mode: 'top' | 'bottom' | 'body', newStartMins: number, newEndMins: number) => {

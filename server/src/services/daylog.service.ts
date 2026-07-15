@@ -33,7 +33,14 @@ export const dayLogService = {
       data.blocks.map(async (b) => {
         // Upsert Activity by name + user
         let activity = await prisma.activity.findFirst({
-          where: { userId, name: b.activityName, categoryId: b.categoryId },
+          where: {
+            userId,
+            name: {
+              equals: b.activityName,
+              mode: 'insensitive',
+            },
+            categoryId: b.categoryId,
+          },
         });
 
         if (!activity) {
@@ -64,22 +71,29 @@ export const dayLogService = {
       })
     );
 
-    // 2. Calculate Effective Ratio
-    // Treated as: productiveMinutes / 1440
-    // Unfilled parts of the day are non-productive ("None")
+    // 2. Calculate Effective Ratio and Sleep Hours
+    // Treated as: importantMinutes / awakeMinutes
+    // Awake minutes = 1440 - sleepMinutes (duration of blocks under category "Sleep")
+    // Important minutes = duration of blocks marked as isImportant (excluding sleep)
     
     const categories = await prisma.category.findMany({ where: { userId } });
-    const nothingSpecificCat = categories.find(c => c.name.toLowerCase() === "nothing specific" || c.name.toLowerCase() === "none");
+    const sleepCat = categories.find(c => c.name.toLowerCase() === "sleep");
     
-    let productiveMinutes = 0;
+    let sleepMinutes = 0;
+    let importantMinutes = 0;
 
     for (const b of blocksWithActivityIds) {
-      if (!nothingSpecificCat || b.categoryId !== nothingSpecificCat.id) {
-        productiveMinutes += b.durationMinutes;
+      const isSleep = sleepCat && b.categoryId === sleepCat.id;
+      if (isSleep) {
+        sleepMinutes += b.durationMinutes;
+      } else if (b.isImportant) {
+        importantMinutes += b.durationMinutes;
       }
     }
 
-    const effectiveRatio = productiveMinutes / 1440;
+    const awakeMinutes = 1440 - sleepMinutes;
+    const effectiveRatio = awakeMinutes > 0 ? importantMinutes / awakeMinutes : 0;
+    const calculatedSleepHours = sleepMinutes / 60;
 
     // 3. Save to database via repository
     return dayLogRepository.upsertDayLogWithBlocks(
@@ -87,7 +101,7 @@ export const dayLogService = {
       date,
       {
         notes: data.notes,
-        sleepHours: data.sleepHours,
+        sleepHours: data.sleepHours !== undefined && data.sleepHours !== null ? data.sleepHours : parseFloat(calculatedSleepHours.toFixed(2)),
         satisfied: !!data.satisfied,
         effectiveRatio: parseFloat(effectiveRatio.toFixed(2)),
       },

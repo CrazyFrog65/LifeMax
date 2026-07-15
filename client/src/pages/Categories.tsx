@@ -364,7 +364,7 @@ export default function Categories() {
             label={
               <Box>
                 <Typography sx={{ color: '#E6EDF3', fontSize: '0.9rem', fontWeight: 600 }}>Productive</Typography>
-                <Typography sx={{ color: '#8B949E', fontSize: '0.75rem' }}>Counts towards your effective ratio</Typography>
+                <Typography sx={{ color: '#8B949E', fontSize: '0.75rem' }}>Counts towards productive time in trends</Typography>
               </Box>
             }
             sx={{ m: 0 }}

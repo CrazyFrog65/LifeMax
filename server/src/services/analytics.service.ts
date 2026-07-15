@@ -58,8 +58,17 @@ export const analyticsService = {
     }
 
     // 4. Process Pie Chart Data (Total hours per category for the week)
+    const categories = await prisma.category.findMany({ where: { userId } });
     const categoryTotals: Record<string, { name: string; hours: number; color: string }> = {};
     
+    categories.forEach(cat => {
+      categoryTotals[cat.id] = {
+        name: cat.name,
+        hours: 0,
+        color: cat.color || "#8B949E",
+      };
+    });
+
     dayLogs.forEach(log => {
       log.timeBlocks.forEach(block => {
         const cat = block.activity.category;
@@ -77,7 +86,7 @@ export const analyticsService = {
     const pieChart = Object.values(categoryTotals).map(item => ({
       ...item,
       hours: parseFloat(item.hours.toFixed(1)),
-    })).filter(item => item.hours > 0);
+    }));
 
     return {
       barChart,
@@ -131,6 +140,7 @@ export const analyticsService = {
     const sleepTrend: any[] = [];
     
     const activityTotals: Record<string, number> = {};
+    const activityDisplayNames: Record<string, string> = {};
 
     // Helper to format date like "Jul 10" from a YYYY-MM-DD string
     const formatDate = (dateStr: string) => {
@@ -197,10 +207,12 @@ export const analyticsService = {
           else eliminateHours += hours;
 
           // Top Activities
-          if (!activityTotals[block.activity.name]) {
-            activityTotals[block.activity.name] = 0;
+          const activityNameLower = block.activity.name.toLowerCase();
+          if (!activityTotals[activityNameLower]) {
+            activityTotals[activityNameLower] = 0;
+            activityDisplayNames[activityNameLower] = block.activity.name;
           }
-          activityTotals[block.activity.name] += hours;
+          activityTotals[activityNameLower] += hours;
         }
       } else {
         sleepTrend.push({ date: formattedDate, hours: 0 });
@@ -231,7 +243,10 @@ export const analyticsService = {
 
     // Top Activities
     const topActivities = Object.keys(activityTotals)
-      .map(name => ({ name, hours: parseFloat(activityTotals[name].toFixed(2)) }))
+      .map(lowerName => ({
+        name: activityDisplayNames[lowerName],
+        hours: parseFloat(activityTotals[lowerName].toFixed(2))
+      }))
       .sort((a, b) => b.hours - a.hours)
       .slice(0, 10);
 
